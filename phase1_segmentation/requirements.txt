@@ -1,0 +1,17 @@
+# Phase 1 — Oil Spill Segmentation
+# ===================================
+# Core (required)
+tensorflow>=2.12.0
+numpy>=1.23.0
+matplotlib>=3.6.0
+
+# Image I/O (install at least one)
+Pillow>=9.0.0
+opencv-python>=4.7.0
+
+# TIFF/GeoTIFF support (recommended for Sentinel-1 data)
+rasterio>=1.3.0
+
+# Utilities
+tqdm>=4.64.0
+scikit-learn>=1.1.0

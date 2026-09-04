@@ -1,0 +1,37 @@
+# Dataset — too large for Git (1.1 GB)
+dataset/
+
+# Model checkpoints and training outputs
+phase1_segmentation/checkpoints/
+phase1_segmentation/outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kaggle credentials — NEVER commit
+.kaggle/
+
+# IDE
+.vscode/
+.idea/
+*.swp
