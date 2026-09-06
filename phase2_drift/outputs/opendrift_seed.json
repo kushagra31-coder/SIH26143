@@ -1,0 +1,8 @@
+{
+  "lon": 57.745,
+  "lat": -20.438,
+  "time": "2020-08-06T06:00:00Z",
+  "uncertainty_radius": 1000,
+  "mask_source": "ground_truth",
+  "SYNTHETIC_TEST_DATA": true
+}

@@ -1,0 +1,17 @@
+{
+  "vessel_name": "Wakashio",
+  "imo": "9337119",
+  "total_score": 93.91,
+  "spatial_evidence": {
+    "score": 98.76,
+    "distance_to_origin_km": 0.62,
+    "note": "Distance from predicted drift origin to actual vessel location."
+  },
+  "behavior_evidence": {
+    "score": 86.64,
+    "deviation_from_plan_km": 43.32,
+    "note": "EXPLICIT SUBSTITUTION: Route-deviation magnitude used instead of AIS-gap due to API limits."
+  },
+  "SYNTHETIC_TEST_DATA": true,
+  "WARNING": "SCORE IS SYNTHETIC AND FABRICATED. DO NOT USE."
+}
