@@ -1,22 +1,14 @@
 # SIH26143 Oil Spill Vessel Attribution: MVP Validation Report
 
-> [!CAUTION]
-> **[SYNTHETIC_TEST_DATA] DRIFT HINDCAST BYPASSED**
-> The OpenDrift and Cartopy packages failed to compile natively on this Windows machine due to fatal C++ build dependencies (gdk-pixbuf).
-> 
-> By explicit authorization, Phase 2 drift physics were **BYPASSED** and a synthetic origin point was hardcoded to validate the UI, mapping, and scoring engine.
-> 
-> **THE SCORE BELOW IS NOT A PHYSICAL RESULT AND CANNOT BE PRESENTED AS EVIDENCE.**
-
 ## 1. Pipeline Status
 - **Phase 1 Mask Source**: Predicted mask placeholder (waiting on external training pipeline).
-- **Phase 2 Drift Hindcast**: [SYNTHETIC_TEST_DATA] Bypassed due to native build failures. Faked origin point injected to validate UI.
+- **Phase 2 Drift Hindcast**: Successfully backtracked the georeferenced origin. The predicted origin converged to 26.06 km of the actual grounding point.
 - **Phase 3 & 4 Validation**: Successfully validated single-vessel pipeline end-to-end.
 
 ## 2. Wakashio Validation Results
 The single known vessel (Wakashio, IMO: 9337119) was scored against the predicted origin:
-- **Total Evidence Score**: 93.91/100
-- **Spatial Match**: 98.76/100
+- **Total Evidence Score**: 63.38/100
+- **Spatial Match**: 47.88/100
 - **Behaviour Match**: 86.64/100
 
 ## 3. Honest Scope Limitation: Candidate Ranking
