@@ -116,15 +116,26 @@ def run_hindcast(seed_path, output_path):
         
         import numpy as np
         
-        # Get the final valid position for each particle (last non-NaN value)
+        # Get the final valid position and timestamp for each particle (last non-NaN value)
         final_lons = []
         final_lats = []
+        hit_times = []
         for p in range(lons.shape[0]):
             valid_l = lons[p, ~np.isnan(lons[p, :])]
             valid_la = lats[p, ~np.isnan(lats[p, :])]
             if len(valid_l) > 0:
                 final_lons.append(valid_l[-1])
                 final_lats.append(valid_la[-1])
+                # Number of valid steps for this particle:
+                num_valid = len(valid_l)
+                # The time they hit NaN is the time of the *next* step (which is index `num_valid` in a 0-indexed array)
+                # Assuming o.get_time_array() gives the time for each step:
+                try:
+                    times = o.get_time_array()[0]
+                    hit_time = times[num_valid - 1] if num_valid <= len(times) else times[-1]
+                    hit_times.append(hit_time)
+                except Exception:
+                    hit_times.append(end_time)
                 
         final_lons = np.array(final_lons)
         final_lats = np.array(final_lats)
@@ -133,12 +144,37 @@ def run_hindcast(seed_path, output_path):
             logging.error("All particles were NaN from the start! Using fallback.")
             final_lons = np.array([lon])
             final_lats = np.array([lat])
+            hit_times = [end_time]
         
         # Calculate centroid of the backtracked particles
         origin_lon = float(np.mean(final_lons))
         origin_lat = float(np.mean(final_lats))
         
+        try:
+            median_hit_time = hit_times[len(hit_times)//2]
+            logging.info(f"Median Time of Coastline Hit (NaN appearance): {median_hit_time}")
+        except Exception as e:
+            logging.warning(f"Could not calculate hit time: {e}")
+            
         logging.info(f"Backtracked Origin Centroid: Lon {origin_lon:.4f}, Lat {origin_lat:.4f}")
+        
+        # Distance calculation
+        def haversine(lon1, lat1, lon2, lat2):
+            import math
+            R = 6371.0 # Earth radius in km
+            dLat = math.radians(lat2 - lat1)
+            dLon = math.radians(lon2 - lon1)
+            lat1 = math.radians(lat1)
+            lat2 = math.radians(lat2)
+            a = math.sin(dLat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dLon/2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+            return R * c
+            
+        dist_opendrift = haversine(origin_lon, origin_lat, 57.745, -20.438)
+        dist_maid = haversine(origin_lon, origin_lat, 57.743, -20.443)
+        
+        logging.info(f"Distance to OpenDrift Ref (57.745, -20.438): {dist_opendrift:.2f} km")
+        logging.info(f"Distance to MAID Report Ref (57.743, -20.443): {dist_maid:.2f} km")
         
         # Save output
         output_data = {
