@@ -27,6 +27,12 @@ def run_hindcast(seed_path, output_path):
         from opendrift.models.openoil import OpenOil
         o = OpenOil(loglevel=20)
         
+        # Set fallback values in case particles drift into masked cells (e.g. land) or hit missing data
+        o.set_config('environment:fallback:x_sea_water_velocity', 0.0)
+        o.set_config('environment:fallback:y_sea_water_velocity', 0.0)
+        o.set_config('environment:fallback:x_wind', 0.0)
+        o.set_config('environment:fallback:y_wind', 0.0)
+        
         # Add readers
         logging.info("Adding readers...")
         # For MVP, try to use global readers if available, else rely on built-in fallback/constant
