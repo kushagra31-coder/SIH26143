@@ -47,7 +47,7 @@ def run_hindcast(seed_path, output_path):
                 # Download currents (modern dataset ID: cmems_mod_glo_phy_my_0.083deg_P1D-m)
                 logging.info("Downloading CMEMS currents...")
                 subprocess.run([
-                    sys.executable, "-m", "copernicusmarine", "subset", 
+                    "copernicusmarine", "subset", 
                     "-i", "cmems_mod_glo_phy_my_0.083deg_P1D-m", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
@@ -59,7 +59,7 @@ def run_hindcast(seed_path, output_path):
                 # Download winds (modern dataset ID: cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H)
                 logging.info("Downloading CMEMS winds...")
                 subprocess.run([
-                    sys.executable, "-m", "copernicusmarine", "subset", 
+                    "copernicusmarine", "subset", 
                     "-i", "cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
