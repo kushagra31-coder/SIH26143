@@ -49,8 +49,8 @@ def run_hindcast(seed_path, output_path):
                 subprocess.run([
                     "copernicusmarine", "subset", 
                     "-i", "cmems_mod_glo_phy_my_0.083deg_P1D-m", 
-                    "-x", "56.0", "-X", "59.0", 
-                    "-y", "-22.0", "-Y", "-19.0", 
+                    "-x", "50.0", "-X", "65.0", 
+                    "-y", "-26.0", "-Y", "-15.0", 
                     "-t", "2020-07-24", "-T", "2020-08-07", 
                     "-v", "uo", "-v", "vo", 
                     "-f", "cmems_currents.nc"
@@ -61,8 +61,8 @@ def run_hindcast(seed_path, output_path):
                 subprocess.run([
                     "copernicusmarine", "subset", 
                     "-i", "cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", 
-                    "-x", "56.0", "-X", "59.0", 
-                    "-y", "-22.0", "-Y", "-19.0", 
+                    "-x", "50.0", "-X", "65.0", 
+                    "-y", "-26.0", "-Y", "-15.0", 
                     "-t", "2020-07-24", "-T", "2020-08-07", 
                     "-v", "eastward_wind", "-v", "northward_wind", 
                     "-f", "cmems_winds.nc"
