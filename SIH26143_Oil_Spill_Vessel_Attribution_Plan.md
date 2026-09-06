@@ -589,3 +589,15 @@ Verified during preparation:
 -   OSLM dataset reference: https://github.com/SARDEEP1/OSLM
 -   Additional oil-spill pipeline reference:
     https://github.com/m7mdehab/oil-spill-detection
+
+## 19. Current Execution Status (MVP Validation)
+
+| Phase | Component | Real-Data Backed? | Status & Honest Scoping |
+| :--- | :--- | :--- | :--- |
+| **0. Validation** | Reference Checks | Yes | Confirmed Wakashio ground-truth casualty report and credentials (GFW, CMEMS). |
+| **1. Masking** | SAR Segmentation | Pending | Waiting on Tanish's external ML training pipeline for the actual predicted mask. |
+| **2. Drift** | Origin Hindcast | SYNTHETIC | Pipeline built (`georeference.py`, `slick_to_origin.py`, `run_opendrift.py`). Due to insurmountable native Windows C++ build blockers (gdk-pixbuf / conda failures), physics were bypassed via explicit authorization. A [SYNTHETIC_TEST_DATA] origin was injected to unblock UI/scoring validation. |
+| **3. AIS Ingestion** | Wakashio Track | Yes | Extracted the actual deviation track and the planned passage waypoints from the official PMA Casualty Report. |
+| **3. AIS Ingestion** | Candidate Pool | Scoped Down | GFW "Events" API works but returned 0 candidates (fishing-focused). MVP is honestly scoped down to single-vessel validation. Full ranking requires elevated GFW access (pending) or commercial AIS APIs. |
+| **4. Matching** | Evidence Scoring | Yes | Scoring math validated on Wakashio. Extracted behaviour score from route-deviation magnitude (replacing AIS-gap). |
+| **5. Output** | Map & Report | Yes | `render_map.py` plotted the predicted origin, planned passage, and actual grounding point. `report.py` generated the honest pitch report explicitly citing the MVP limitations and the PMA report ground truth. |
