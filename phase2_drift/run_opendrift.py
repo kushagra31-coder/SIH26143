@@ -43,10 +43,11 @@ def run_hindcast(seed_path, output_path):
                 import subprocess
                 from opendrift.readers import reader_netCDF_CF_generic
                 
-                # Download currents (GLOBAL_MULTIYEAR_PHY_001_030)
+                import sys
+                # Download currents
                 logging.info("Downloading CMEMS currents...")
                 subprocess.run([
-                    "copernicusmarine", "subset", 
+                    sys.executable, "-m", "copernicusmarine", "subset", 
                     "-i", "GLOBAL_MULTIYEAR_PHY_001_030", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
@@ -55,10 +56,10 @@ def run_hindcast(seed_path, output_path):
                     "-f", "cmems_currents.nc", "--force-download"
                 ], check=True)
                 
-                # Download winds (WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006)
+                # Download winds
                 logging.info("Downloading CMEMS winds...")
                 subprocess.run([
-                    "copernicusmarine", "subset", 
+                    sys.executable, "-m", "copernicusmarine", "subset", 
                     "-i", "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
@@ -72,9 +73,8 @@ def run_hindcast(seed_path, output_path):
                 o.add_reader([r_currents, r_winds])
                 logging.info("Real CMEMS readers added successfully.")
             except Exception as e:
-                logging.error(f"Failed to load real CMEMS data: {e}")
-                logging.warning("Falling back to synthetic constant wind/current.")
-                used_synthetic_forcing = True
+                logging.error(f"CRITICAL ERROR: Failed to load real CMEMS data! Check the console output above for the exact reason from Copernicus.")
+                raise e
         else:
             logging.warning("No CMEMS credentials found in environment. Using synthetic constant forcing.")
             used_synthetic_forcing = True
