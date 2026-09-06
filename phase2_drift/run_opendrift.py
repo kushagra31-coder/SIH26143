@@ -17,10 +17,10 @@ def run_hindcast(seed_path, output_path):
     lon = seed["lon"]
     lat = seed["lat"]
     time_str = seed["time"]
-    start_time = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+    start_time = datetime.fromisoformat(time_str.replace("Z", ""))
     
     # Grounding occurred July 25, 2020 19:25 LT (approx 15:25 UTC)
-    end_time = datetime(2020, 7, 25, 15, 25, tzinfo=timezone.utc)
+    end_time = datetime(2020, 7, 25, 15, 25)
     
     try:
         # Import OpenDrift only when needed to save time if running checks
