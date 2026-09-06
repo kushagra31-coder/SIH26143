@@ -114,13 +114,29 @@ def run_hindcast(seed_path, output_path):
                 lons = o.get_property('lon')[0]
                 lats = o.get_property('lat')[0]
         
-        # The last step in the array is the state at end_time (the origin)
-        final_lons = lons[:, -1]
-        final_lats = lats[:, -1]
+        import numpy as np
+        
+        # Get the final valid position for each particle (last non-NaN value)
+        final_lons = []
+        final_lats = []
+        for p in range(lons.shape[0]):
+            valid_l = lons[p, ~np.isnan(lons[p, :])]
+            valid_la = lats[p, ~np.isnan(lats[p, :])]
+            if len(valid_l) > 0:
+                final_lons.append(valid_l[-1])
+                final_lats.append(valid_la[-1])
+                
+        final_lons = np.array(final_lons)
+        final_lats = np.array(final_lats)
+        
+        if len(final_lons) == 0:
+            logging.error("All particles were NaN from the start! Using fallback.")
+            final_lons = np.array([lon])
+            final_lats = np.array([lat])
         
         # Calculate centroid of the backtracked particles
-        origin_lon = final_lons.mean()
-        origin_lat = final_lats.mean()
+        origin_lon = float(np.mean(final_lons))
+        origin_lat = float(np.mean(final_lats))
         
         logging.info(f"Backtracked Origin Centroid: Lon {origin_lon:.4f}, Lat {origin_lat:.4f}")
         
