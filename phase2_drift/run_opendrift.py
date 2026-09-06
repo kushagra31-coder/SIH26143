@@ -41,31 +41,31 @@ def run_hindcast(seed_path, output_path):
             logging.info("CMEMS credentials found! Setting up real wind/current forcing...")
             try:
                 import subprocess
+                import sys
                 from opendrift.readers import reader_netCDF_CF_generic
                 
-                import sys
-                # Download currents
+                # Download currents (modern dataset ID: cmems_mod_glo_phy_my_0.083deg_P1D-m)
                 logging.info("Downloading CMEMS currents...")
                 subprocess.run([
                     sys.executable, "-m", "copernicusmarine", "subset", 
-                    "-i", "GLOBAL_MULTIYEAR_PHY_001_030", 
+                    "-i", "cmems_mod_glo_phy_my_0.083deg_P1D-m", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
                     "-t", "2020-07-24", "-T", "2020-08-07", 
                     "-v", "uo", "-v", "vo", 
-                    "-f", "cmems_currents.nc", "--force-download"
+                    "-f", "cmems_currents.nc"
                 ], check=True)
                 
-                # Download winds
+                # Download winds (modern dataset ID: cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H)
                 logging.info("Downloading CMEMS winds...")
                 subprocess.run([
                     sys.executable, "-m", "copernicusmarine", "subset", 
-                    "-i", "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006", 
+                    "-i", "cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", 
                     "-x", "56.0", "-X", "59.0", 
                     "-y", "-22.0", "-Y", "-19.0", 
                     "-t", "2020-07-24", "-T", "2020-08-07", 
                     "-v", "eastward_wind", "-v", "northward_wind", 
-                    "-f", "cmems_winds.nc", "--force-download"
+                    "-f", "cmems_winds.nc"
                 ], check=True)
                 
                 r_currents = reader_netCDF_CF_generic.Reader("cmems_currents.nc")
@@ -73,8 +73,9 @@ def run_hindcast(seed_path, output_path):
                 o.add_reader([r_currents, r_winds])
                 logging.info("Real CMEMS readers added successfully.")
             except Exception as e:
-                logging.error(f"CRITICAL ERROR: Failed to load real CMEMS data! Check the console output above for the exact reason from Copernicus.")
-                raise e
+                logging.critical(f"Failed to load real CMEMS data! Make sure you accepted the Copernicus Marine Terms of Service for these datasets: {e}")
+                logging.warning("Falling back to synthetic constant wind/current.")
+                used_synthetic_forcing = True
         else:
             logging.warning("No CMEMS credentials found in environment. Using synthetic constant forcing.")
             used_synthetic_forcing = True
