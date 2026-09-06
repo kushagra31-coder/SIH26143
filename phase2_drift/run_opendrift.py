@@ -93,8 +93,19 @@ def run_hindcast(seed_path, output_path):
         o.run(end_time=end_time, time_step=-timedelta(hours=1), time_step_output=timedelta(hours=6))
         
         # Extract the final positions (which is the origin since we are backtracking)
-        lons = o.elements_lon
-        lats = o.elements_lat
+        try:
+            # Modern versions (using xarray dataset)
+            lons = o.result.lon.values
+            lats = o.result.lat.values
+        except AttributeError:
+            try:
+                # Older dictionary-based history
+                lons = o.history['lon']
+                lats = o.history['lat']
+            except (AttributeError, TypeError, KeyError):
+                # Fallback to property getter
+                lons = o.get_property('lon')[0]
+                lats = o.get_property('lat')[0]
         
         # The last step in the array is the state at end_time (the origin)
         final_lons = lons[:, -1]
