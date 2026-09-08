@@ -378,14 +378,39 @@ UNOSAT reference:
 UNOSAT/TSX_20200810_OilSpillExtent_ReefPointeEsny.shp
 ```
 ---
-Key Sources
-UNITAR–UNOSAT — Satellite detected potential oil extent as of 10 August 2020 in Pointe d'Esny Reef, Republic of Mauritius, Product 2885.
-Rajendran et al. (2021) — Detection of Wakashio oil spill off Mauritius using Sentinel-1 and 2 data: Capability of sensors, image transformation methods and mapping, Environmental Pollution, 274, 116618. DOI: `10.1016/j.envpol.2021.116618`.
-Rajendran et al. (2022) — History of a disaster: A baseline assessment of the Wakashio oil spill on the coast of Mauritius, Indian Ocean, Marine Pollution Bulletin, 175, 113330.
-SOS SAR Oil Spill Segmentation Dataset — Kaggle mirror:
-`bitsandlayers/sar-oil-spill-segmentation-dataset-sos`
-ESA SNAP — Sentinel-1 preprocessing.
-Natural Earth 10 m — land masking only.
+## Key Sources
+
+### UNOSAT
+
+UNITAR–UNOSAT — *Satellite detected potential oil extent as of 10 August 2020 in Pointe d'Esny Reef, Republic of Mauritius*, Product 2885.
+
+### Wakashio Remote Sensing
+
+Rajendran et al. (2021) — *Detection of Wakashio oil spill off Mauritius using Sentinel-1 and 2 data: Capability of sensors, image transformation methods and mapping.*
+
+**Environmental Pollution**, 274, 116618.
+
+DOI: `10.1016/j.envpol.2021.116618`
+
+### Wakashio Baseline Assessment
+
+Rajendran et al. (2022) — *History of a disaster: A baseline assessment of the Wakashio oil spill on the coast of Mauritius, Indian Ocean.*
+
+**Marine Pollution Bulletin**, 175, 113330.
+
+### Training Dataset
+
+SAR Oil Spill Segmentation Dataset (SOS)
+
+Kaggle: `bitsandlayers/sar-oil-spill-segmentation-dataset-sos`
+
+### Software & Geospatial Data
+
+- **ESA SNAP** — Sentinel-1 preprocessing
+- **QGIS** — visualization and geospatial analysis
+- **Natural Earth 10m** — land masking
+- **TensorFlow / Keras** — U-Net training and inference
+- **GeoPandas / Rasterio / NumPy** — geospatial processing
 ---
 Current Status
 ```text
