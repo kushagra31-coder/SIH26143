@@ -3,7 +3,10 @@ losses_metrics.py — Phase 1 Custom Losses and Metrics
 ======================================================
 Implements:
   - Dice coefficient (metric + loss component)
-  - Binary Cross-Entropy + Dice combined loss  (training objective)
+  - Binary Cross-Entropy + Dice combined loss  (original baseline)
+  - Tversky index/loss
+  - BCE + Tversky loss
+  - BCE + Dice + Tversky hybrid loss (experimental)
   - IoU (Intersection over Union) metric
 
 All functions follow the Keras metric / loss interface conventions and
@@ -57,17 +60,108 @@ def dice_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     return 1.0 - dice_coeff(y_true, y_pred)
 
 
+def tversky_index(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+    alpha: float = 0.4,
+    beta: float = 0.6,
+) -> tf.Tensor:
+    """
+    Tversky index for binary segmentation.
+
+    alpha weights false positives and beta weights false negatives.
+    beta > alpha therefore penalizes false negatives more strongly.
+    """
+    y_true_f = tf.cast(tf.reshape(y_true, [-1]), tf.float32)
+    y_pred_f = tf.cast(tf.reshape(y_pred, [-1]), tf.float32)
+
+    true_pos = tf.reduce_sum(y_true_f * y_pred_f)
+    false_pos = tf.reduce_sum((1.0 - y_true_f) * y_pred_f)
+    false_neg = tf.reduce_sum(y_true_f * (1.0 - y_pred_f))
+
+    return (
+        true_pos + _SMOOTH
+    ) / (
+        true_pos
+        + alpha * false_pos
+        + beta * false_neg
+        + _SMOOTH
+    )
+
+
+def tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+    alpha: float = 0.4,
+    beta: float = 0.6,
+) -> tf.Tensor:
+    """Tversky loss = 1 − Tversky index."""
+    return 1.0 - tversky_index(
+        y_true,
+        y_pred,
+        alpha=alpha,
+        beta=beta,
+    )
+
+
 def bce_dice_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     """
-    Combined loss = Binary Cross-Entropy + Dice Loss.
+    Original baseline loss = Binary Cross-Entropy + Dice Loss.
 
-    BCE handles well-calibrated per-pixel probabilities.
-    Dice handles class imbalance (oil pixels are rare).
-    Together they provide stable gradients for both majority and minority classes.
+    Kept unchanged for comparison with previous experiments.
     """
     bce = keras.losses.binary_crossentropy(y_true, y_pred)
     bce = tf.reduce_mean(bce)
     return bce + dice_loss(y_true, y_pred)
+
+
+def bce_tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+) -> tf.Tensor:
+    """
+    BCE + Tversky loss.
+
+    alpha=0.4, beta=0.6 gives slightly more emphasis to false negatives.
+    """
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = tf.reduce_mean(bce)
+
+    tv = tversky_loss(
+        y_true,
+        y_pred,
+        alpha=0.4,
+        beta=0.6,
+    )
+
+    return bce + tv
+
+
+def bce_dice_tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+) -> tf.Tensor:
+    """
+    Experimental hybrid loss:
+
+        0.5 * BCE + 0.25 * Dice Loss + 0.25 * Tversky Loss
+
+    Keeps the stable BCE/Dice behavior while adding extra pressure against
+    false negatives.
+    """
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = tf.reduce_mean(bce)
+
+    dl = dice_loss(y_true, y_pred)
+
+    tl = tversky_loss(
+        y_true,
+        y_pred,
+        alpha=0.4,
+        beta=0.6,
+    )
+
+    return 0.5 * bce + 0.25 * dl + 0.25 * tl
 
 
 # ─────────────────────────────────────────────────────────────────────────────
