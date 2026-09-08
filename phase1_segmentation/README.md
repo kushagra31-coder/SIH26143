@@ -287,14 +287,36 @@ substantial overprediction;
 persistent coastal/boundary false positives.
 For a Round 1 MVP, these results are sufficient to demonstrate an end-to-end candidate-detection pipeline, but should not be presented as production-grade or field-validated segmentation accuracy.
 ---
-Important Limitations
-SAR look-alikes
+## Interpretation
+
+The model has:
+
+- **High recall**
+- **Moderate spatial agreement**
+- **Relatively low precision**
+- **Substantial overprediction**
+- **Persistent coastal/boundary false positives**
+
+For a Round 1 MVP, these results are sufficient to demonstrate an end-to-end candidate-detection pipeline, but should not be presented as production-grade or field-validated segmentation accuracy.
+
+---
+
+## Important Limitations
+
+### 1. SAR Look-Alikes
+
 Dark SAR regions can come from phenomena other than oil, including calm water, wind effects, geometry, and coastal structures.
-Domain gap
+
+### 2. Domain Gap
+
 The SOS training data and the real Wakashio scene differ in geography and acquisition conditions, so transfer introduces domain shift.
-Reference uncertainty
-UNOSAT is satellite-derived and preliminary rather than field-validated.
-Attribution uncertainty
+
+### 3. Reference Uncertainty
+
+The UNOSAT reference is satellite-derived and preliminary rather than field-validated.
+
+### 4. Attribution Uncertainty
+
 A vessel being close to a detected spill does not prove that it caused the spill.
 ---
 AIS Integration
