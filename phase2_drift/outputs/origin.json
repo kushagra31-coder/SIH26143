@@ -1,9 +1,14 @@
 {
-  "origin_lon": 57.967063903808594,
-  "origin_lat": -20.54827308654785,
+  "origin_lon": 57.745,
+  "origin_lat": -20.438,
   "origin_time": "2020-07-25T15:25:00Z",
   "particles": {
-    "lons": [],
-    "lats": []
-  }
+    "lons": [
+      57.745
+    ],
+    "lats": [
+      -20.438
+    ]
+  },
+  "SYNTHETIC_TEST_DATA": true
 }

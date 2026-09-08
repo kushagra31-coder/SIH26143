@@ -15,7 +15,10 @@ def convert_slick_to_seed(georef_path, output_path, timestamp_str, mask_source="
     centroid = None
     if "type" in data and data["type"] == "FeatureCollection":
         props = data["features"][0].get("properties", {})
-        centroid = props.get("centroid")
+        if "centroid_lon" in props and "centroid_lat" in props:
+            centroid = [props["centroid_lon"], props["centroid_lat"]]
+        elif "centroid" in props:
+            centroid = props.get("centroid")
     elif "geo_centroid" in data:
         centroid = data["geo_centroid"]
         

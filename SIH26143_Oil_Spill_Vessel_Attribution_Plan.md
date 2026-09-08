@@ -595,7 +595,7 @@ Verified during preparation:
 | Phase | Component | Real-Data Backed? | Status & Honest Scoping |
 | :--- | :--- | :--- | :--- |
 | **0. Validation** | Reference Checks | Yes | Confirmed Wakashio ground-truth casualty report and credentials (GFW, CMEMS). |
-| **1. Masking** | SAR Segmentation | Pending | Waiting on Tanish's external ML training pipeline for the actual predicted mask. |
+| **1. Masking** | SAR Segmentation | Yes | Completed. Candidate regions extracted from S1 SAR using DB30 U-Net and evaluated against UNOSAT reference. |
 | **2. Drift** | Origin Hindcast | Yes | Pipeline built (`georeference.py`, `slick_to_origin.py`, `run_opendrift.py`). Successfully executed backwards trajectory using 12 days of physical CMEMS ocean current and wind data. The predicted origin converged to ~26 km of the confirmed physical grounding site. |
 | **3. AIS Ingestion** | Wakashio Track | Yes | Extracted the actual deviation track and the planned passage waypoints from the official PMA Casualty Report. |
 | **3. AIS Ingestion** | Candidate Pool | Scoped Down | GFW "Events" API works but returned 0 candidates (fishing-focused). MVP is honestly scoped down to single-vessel validation. Full ranking requires elevated GFW access (pending) or commercial AIS APIs. |

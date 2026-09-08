@@ -1,0 +1,336 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@theme {
+  /* Core Brand Colors */
+  --color-cmems-950: #020d1a;
+  --color-cmems-900: #051426;
+  --color-cmems-850: #071e38;
+  --color-cmems-800: #0a2644;
+  --color-cmems-750: #0d3056;
+  --color-cmems-700: #123a6b;
+  --color-cmems-600: #1a4f8f;
+  --color-cmems-500: #2361aa;
+  --color-cmems-400: #3a7bc8;
+  --color-cmems-300: #60a5fa;
+  
+  /* Accent Colors */
+  --color-ocean-cyan: #06b6d4;
+  --color-ocean-teal: #0d9488;
+  --color-ocean-blue: #3b82f6;
+  --color-ocean-green: #10b981;
+  --color-ocean-amber: #f59e0b;
+  --color-ocean-red: #ef4444;
+  --color-ocean-coral: #f87171;
+  --color-ocean-purple: #818cf8;
+  
+  /* Semantic UI */
+  --color-surface-primary: #051426;
+  --color-surface-secondary: #0a2644;
+  --color-surface-elevated: #0d3056;
+  --color-surface-overlay: #123a6b;
+  --color-border-subtle: rgba(59, 130, 246, 0.15);
+  --color-border-default: rgba(59, 130, 246, 0.25);
+  --color-border-strong: rgba(59, 130, 246, 0.45);
+  --color-text-primary: #f0f6ff;
+  --color-text-secondary: #94b8d4;
+  --color-text-muted: #5a7d9a;
+  
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+}
+
+/* =========================================================
+   GLOBAL RESET & BASE
+   ========================================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--color-cmems-950);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   CUSTOM SCROLLBARS — Copernicus Style
+   ========================================================= */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
+/* =========================================================
+   MAPLIBRE GL OVERRIDES — Professional Data Portal Style
+   ========================================================= */
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 6px;
+}
+.maplibregl-popup-tip {
+  border-top-color: #0a2644 !important;
+  border-bottom-color: #0a2644 !important;
+}
+.maplibregl-ctrl-group {
+  background: rgba(5, 20, 38, 0.92) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 6px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden;
+}
+.maplibregl-ctrl-group button {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15) !important;
+  background: transparent !important;
+  transition: background 0.15s;
+}
+.maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+.maplibregl-ctrl-group button:hover {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+.maplibregl-ctrl-icon {
+  filter: invert(0.75) hue-rotate(200deg) !important;
+}
+.maplibregl-ctrl-attrib {
+  background: rgba(5, 20, 38, 0.82) !important;
+  color: rgba(148, 184, 212, 0.7) !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+  font-family: var(--font-mono) !important;
+}
+.maplibregl-ctrl-scale {
+  background: rgba(5, 20, 38, 0.82) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: var(--color-text-secondary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 10px !important;
+}
+
+/* =========================================================
+   CMEMS GLASS PANEL COMPONENT
+   ========================================================= */
+.cmems-panel {
+  background: rgba(10, 38, 68, 0.90);
+  backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+}
+
+.cmems-panel-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* =========================================================
+   COLORBAR GRADIENT — Copernicus Ocean Variable Style
+   ========================================================= */
+.cmems-colorbar-oil {
+  background: linear-gradient(to right, 
+    #060b14 0%, 
+    #0a1a2e 8%, 
+    #0d2d4f 16%, 
+    #0e4a6f 24%, 
+    #0b6a8a 32%, 
+    #078c8c 40%, 
+    #05a884 48%, 
+    #1dbf6b 56%, 
+    #6bcc44 64%, 
+    #c5d82b 72%, 
+    #e8a81e 80%, 
+    #e05c1a 88%, 
+    #b51c1c 100%
+  );
+}
+
+.cmems-colorbar-current {
+  background: linear-gradient(to right,
+    #0c0c2e 0%,
+    #1a1a5e 16%,
+    #1e4d99 32%,
+    #1e8bc3 48%,
+    #2ec4b6 64%,
+    #7ee8a2 80%,
+    #ffd166 90%,
+    #ef476f 100%
+  );
+}
+
+.cmems-colorbar-wind {
+  background: linear-gradient(to right,
+    #f8f9fa 0%,
+    #dee2e6 12%,
+    #adb5bd 25%,
+    #6c757d 38%,
+    #495057 50%,
+    #343a40 62%,
+    #212529 75%,
+    #111 88%,
+    #000 100%
+  );
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+@keyframes radar-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  70% { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes data-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-radar-ring { animation: radar-ring 2.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-data-pulse { animation: data-pulse 2s ease-in-out infinite; }
+.animate-slide-left { animation: slide-in-left 0.25s ease-out forwards; }
+.animate-slide-right { animation: slide-in-right 0.25s ease-out forwards; }
+.animate-fade-up { animation: fade-up 0.3s ease-out forwards; }
+
+/* =========================================================
+   INPUT RANGE — Copernicus Styled Slider
+   ========================================================= */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(59, 130, 246, 0.25);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #93c5fd;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* =========================================================
+   CHECKBOX / TOGGLE
+   ========================================================= */
+input[type="checkbox"] {
+  accent-color: #3b82f6;
+}
+
+/* =========================================================
+   SELECT DROPDOWN
+   ========================================================= */
+select {
+  background-color: rgba(10, 38, 68, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: var(--color-text-primary);
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+select:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+/* =========================================================
+   TAG / CHIP
+   ========================================================= */
+.cmems-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+/* =========================================================
+   PRODUCT CARD HOVER
+   ========================================================= */
+.cmems-card {
+  background: rgba(10, 38, 68, 0.7);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.cmems-card:hover {
+  background: rgba(13, 48, 86, 0.85);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.08), inset 0 0 20px rgba(59, 130, 246, 0.03);
+  transform: translateY(-1px);
+}
+.cmems-card.active {
+  background: rgba(18, 58, 107, 0.9);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.12);
+}

@@ -1,0 +1,8 @@
+{
+  "case_id": "WAKASHIO-2020",
+  "name": "MV Wakashio Grounding",
+  "location": "Pointe d'Esny Reef, Mauritius",
+  "date": "August 2020",
+  "status": "HISTORICAL REPLAY",
+  "summary": "Historical reconstruction of the MV Wakashio oil spill and vessel grounding incident using satellite segmentation, physical drift modelling, and historical AIS traffic reconstruction."
+}
