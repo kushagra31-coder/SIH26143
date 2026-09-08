@@ -2,13 +2,27 @@
 data_pipeline.py — Phase 1 tf.data Pipeline
 ============================================
 Responsibilities:
-  1. Scan directories and build matched image/mask pair lists.
-  2. Split TRAIN set into train / validation (scene-level preferred; falls
-     back to random split with documented limitation).
-  3. Build deterministic tf.data.Dataset pipelines for train and validation.
-  4. Expose a helper for the test set (no augmentation, no shuffle).
+  1. Load the PREPARED Sentinel dataset from oil_spill_dataset/.
+  2. Use the existing train/ and val/ directories directly (no second split).
+  3. Apply on-the-fly geometric augmentation to TRAIN ONLY.
+  4. Build tf.data.Dataset pipelines for train and validation.
+  5. Expose an optional test dataset if a test directory exists.
 
-Everything is driven by config.py values.
+Expected project layout:
+    project_root/
+    ├── oil_spill_dataset/
+    │   ├── train/
+    │   │   ├── images/
+    │   │   └── masks/
+    │   └── val/
+    │       ├── images/
+    │       └── masks/
+    └── SIH26143/
+        └── phase1_segmentation/
+            └── data_pipeline.py
+
+The dataset root is resolved relative to this file, so this module does not
+depend on the current working directory.
 """
 
 import os
@@ -25,6 +39,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config
 
 logger = logging.getLogger(__name__)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Prepared dataset paths
+# ─────────────────────────────────────────────────────────────────────────────
+# data_pipeline.py is:
+#   <project_root>/SIH26143/phase1_segmentation/data_pipeline.py
+# Therefore parents[2] is <project_root>.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATASET_ROOT = PROJECT_ROOT / "oil_spill_dataset"
+
+TRAIN_IMG_DIR = DATASET_ROOT / "train" / "images"
+TRAIN_MASK_DIR = DATASET_ROOT / "train" / "masks"
+
+VAL_IMG_DIR = DATASET_ROOT / "val" / "images"
+VAL_MASK_DIR = DATASET_ROOT / "val" / "masks"
+
+# Optional final-test location. Your current prepared dataset does not
+# contain this folder, so test_ds will be empty until you add it.
+TEST_IMG_DIR = DATASET_ROOT / "test" / "images"
+TEST_MASK_DIR = DATASET_ROOT / "test" / "masks"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -157,6 +192,65 @@ _MASK_DIVISOR: float  = 1.0     # updated by build_datasets()
 _N_CHANNELS:   int    = 3       # updated by build_datasets()
 
 
+
+def _augment_pair(
+    img: tf.Tensor,
+    mask: tf.Tensor,
+) -> Tuple[tf.Tensor, tf.Tensor]:
+    """
+    Apply the SAME random geometric transformation to image and mask.
+
+    Augmentations:
+      - random horizontal flip (50%)
+      - random vertical flip (50%)
+      - random rotation by 0/90/180/270 degrees
+
+    Only geometric transforms are used. The same transform is applied to the
+    mask so image/mask correspondence is preserved.
+    """
+    # Random horizontal flip.
+    flip_lr = tf.random.uniform(()) > 0.5
+    img = tf.cond(
+        flip_lr,
+        lambda: tf.image.flip_left_right(img),
+        lambda: img,
+    )
+    mask = tf.cond(
+        flip_lr,
+        lambda: tf.image.flip_left_right(mask),
+        lambda: mask,
+    )
+
+    # Random vertical flip.
+    flip_ud = tf.random.uniform(()) > 0.5
+    img = tf.cond(
+        flip_ud,
+        lambda: tf.image.flip_up_down(img),
+        lambda: img,
+    )
+    mask = tf.cond(
+        flip_ud,
+        lambda: tf.image.flip_up_down(mask),
+        lambda: mask,
+    )
+
+    # Random rotation: 0, 90, 180, or 270 degrees.
+    k = tf.random.uniform(
+        shape=[],
+        minval=0,
+        maxval=4,
+        dtype=tf.int32,
+    )
+
+    img = tf.image.rot90(img, k=k)
+    mask = tf.image.rot90(mask, k=k)
+
+    # Keep mask binary.
+    mask = tf.cast(mask > 0.5, tf.float32)
+
+    return img, mask
+
+
 def _load_and_preprocess(
     img_path: tf.Tensor,
     mask_path: tf.Tensor,
@@ -206,11 +300,12 @@ def _set_shapes(img: tf.Tensor, mask: tf.Tensor):
 def _make_tf_dataset(
     pairs: List[Tuple[str, str]],
     shuffle: bool = False,
+    augment: bool = False,
     batch_size: int = config.BATCH_SIZE,
     seed: int = config.SEED,
     prefetch: bool = True,
 ) -> tf.data.Dataset:
-    """Build a batched tf.data.Dataset from a list of (img_path, mask_path) pairs."""
+    """Build a batched tf.data.Dataset and optionally augment it."""
     img_paths  = [p[0] for p in pairs]
     mask_paths = [p[1] for p in pairs]
 
@@ -222,9 +317,22 @@ def _make_tf_dataset(
     ds = ds.map(
         _load_and_preprocess,
         num_parallel_calls=tf.data.AUTOTUNE,
-        deterministic=not shuffle,   # allow non-determinism only when shuffling
+        deterministic=not shuffle,
     )
-    ds = ds.map(_set_shapes, num_parallel_calls=tf.data.AUTOTUNE)
+
+    ds = ds.map(
+        _set_shapes,
+        num_parallel_calls=tf.data.AUTOTUNE,
+    )
+
+    # Augment TRAIN only. Validation/test remain unchanged.
+    if augment:
+        ds = ds.map(
+            _augment_pair,
+            num_parallel_calls=tf.data.AUTOTUNE,
+            deterministic=False,
+        )
+
     ds = ds.batch(batch_size, drop_remainder=False)
 
     if prefetch:
@@ -290,66 +398,158 @@ def _detect_norm_params(pairs: List[Tuple[str, str]], n_samples: int = 20):
 # Public API
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _empty_dataset() -> tf.data.Dataset:
+    """Return an empty dataset with the expected image/mask shapes."""
+    h, w = config.IMG_SIZE
+
+    def generator():
+        if False:
+            yield (
+                np.zeros((h, w, _N_CHANNELS), dtype=np.float32),
+                np.zeros((h, w, 1), dtype=np.float32),
+            )
+
+    return tf.data.Dataset.from_generator(
+        generator,
+        output_signature=(
+            tf.TensorSpec(
+                shape=(h, w, _N_CHANNELS),
+                dtype=tf.float32,
+            ),
+            tf.TensorSpec(
+                shape=(h, w, 1),
+                dtype=tf.float32,
+            ),
+        ),
+    ).batch(config.BATCH_SIZE)
+
+
 def build_datasets(
     batch_size: int = config.BATCH_SIZE,
     seed: int      = config.SEED,
 ) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset, dict]:
     """
-    Build and return:
-      train_ds    — shuffled, batched, prefetched
-      val_ds      — ordered, batched, prefetched
-      test_ds     — ordered, batched, prefetched  (for final eval only)
-      meta        — dict with pair counts, split strategy, norm params
+    Build the datasets from the prepared Sentinel subset.
 
-    The TEST dataset is returned for completeness but MUST NOT be used during
-    model selection or hyperparameter tuning.
+    Expected input structure:
+        oil_spill_dataset/
+        ├── train/
+        │   ├── images/
+        │   └── masks/
+        └── val/
+            ├── images/
+            └── masks/
+
+    IMPORTANT:
+        - train/ is used directly for model training.
+        - val/ is used directly for validation.
+        - No additional train/validation split is performed.
+        - Geometric augmentation is applied on-the-fly to train only.
+        - Validation and test data are never augmented.
+        - test/ is optional. If absent, an empty test dataset is returned.
+          This keeps Phase 1 training independent of the final test set.
     """
-    # ── Collect pairs ─────────────────────────────────────────────────────────
-    train_pairs = _collect_pairs(config.TRAIN_IMG_DIR, config.TRAIN_MASK_DIR)
-    test_pairs  = _collect_pairs(config.TEST_IMG_DIR,  config.TEST_MASK_DIR)
+    global _NORM_DIVISOR, _MASK_DIVISOR, _N_CHANNELS
+
+    # ── Verify dataset root ──────────────────────────────────────────────────
+    if not DATASET_ROOT.exists():
+        raise FileNotFoundError(
+            f"Dataset root not found:\n{DATASET_ROOT}\n\n"
+            "Expected this folder beside the SIH26143 folder:\n"
+            "project_root/oil_spill_dataset/"
+        )
+
+    # ── Collect prepared train/validation pairs ──────────────────────────────
+    train_pairs = _collect_pairs(TRAIN_IMG_DIR, TRAIN_MASK_DIR)
+    val_pairs   = _collect_pairs(VAL_IMG_DIR, VAL_MASK_DIR)
+
+    # ── Optional test set ────────────────────────────────────────────────────
+    test_available = TEST_IMG_DIR.is_dir() and TEST_MASK_DIR.is_dir()
+
+    if test_available:
+        test_pairs = _collect_pairs(TEST_IMG_DIR, TEST_MASK_DIR)
+    else:
+        test_pairs = []
 
     if not train_pairs:
         raise FileNotFoundError(
-            f"No matched pairs found under {config.TRAIN_IMG_DIR} / "
-            f"{config.TRAIN_MASK_DIR}.\n"
-            "Check DATASET_ROOT in config.py."
+            f"No training image/mask pairs found.\n"
+            f"Images: {TRAIN_IMG_DIR}\n"
+            f"Masks : {TRAIN_MASK_DIR}\n"
+            "Check the oil_spill_dataset folder structure."
         )
 
-    # ── Auto-detect normalisation ─────────────────────────────────────────────
-    _detect_norm_params(train_pairs, n_samples=min(30, len(train_pairs)))
+    if not val_pairs:
+        raise FileNotFoundError(
+            f"No validation image/mask pairs found.\n"
+            f"Images: {VAL_IMG_DIR}\n"
+            f"Masks : {VAL_MASK_DIR}\n"
+            "Check the oil_spill_dataset folder structure."
+        )
 
-    # ── Split train → train + val ─────────────────────────────────────────────
-    train_split, val_split, strategy = split_train_val(
-        train_pairs, val_fraction=config.VAL_SPLIT, seed=seed
+    # ── Auto-detect normalisation ────────────────────────────────────────────
+    _detect_norm_params(
+        train_pairs,
+        n_samples=min(30, len(train_pairs)),
     )
 
-    print(f"\n[DataPipeline] Split strategy : {strategy}")
-    print(f"[DataPipeline] Train pairs    : {len(train_split)}")
-    print(f"[DataPipeline] Val   pairs    : {len(val_split)}")
+    # ── IMPORTANT: use the prepared split directly ───────────────────────────
+    strategy = "predefined train/val directories"
+
+    print(f"\n[DataPipeline] Dataset root   : {DATASET_ROOT}")
+    print(f"[DataPipeline] Split strategy : {strategy}")
+    print(f"[DataPipeline] Train pairs    : {len(train_pairs)}")
+    print(f"[DataPipeline] Val   pairs    : {len(val_pairs)}")
     print(f"[DataPipeline] Test  pairs    : {len(test_pairs)}")
     print(f"[DataPipeline] Channels       : {_N_CHANNELS}")
     print(f"[DataPipeline] Img divisor    : {_NORM_DIVISOR}")
     print(f"[DataPipeline] Mask divisor   : {_MASK_DIVISOR}")
+    print(
+        "[DataPipeline] Train augmentation: "
+        "horizontal flip, vertical flip, random 90-degree rotations"
+    )
 
-    # ── Build tf.data datasets ────────────────────────────────────────────────
-    train_ds = _make_tf_dataset(train_split, shuffle=True,
-                                 batch_size=batch_size, seed=seed)
-    val_ds   = _make_tf_dataset(val_split,   shuffle=False,
-                                 batch_size=batch_size, seed=seed)
-    test_ds  = _make_tf_dataset(test_pairs,  shuffle=False,
-                                 batch_size=batch_size, seed=seed)
+    # ── Build tf.data datasets ───────────────────────────────────────────────
+    train_ds = _make_tf_dataset(
+        train_pairs,
+        shuffle=True,
+        augment=True,          # augmentation TRAIN ONLY
+        batch_size=batch_size,
+        seed=seed,
+    )
+
+    val_ds = _make_tf_dataset(
+        val_pairs,
+        shuffle=False,
+        augment=False,         # no augmentation during validation
+        batch_size=batch_size,
+        seed=seed,
+    )
+
+    if test_pairs:
+        test_ds = _make_tf_dataset(
+            test_pairs,
+            shuffle=False,
+            augment=False,      # no augmentation during final test
+            batch_size=batch_size,
+            seed=seed,
+        )
+    else:
+        test_ds = _empty_dataset()
 
     meta = {
-        "n_train"       : len(train_split),
-        "n_val"         : len(val_split),
-        "n_test"        : len(test_pairs),
+        "n_train": len(train_pairs),
+        "n_val": len(val_pairs),
+        "n_test": len(test_pairs),
         "split_strategy": strategy,
-        "n_channels"    : _N_CHANNELS,
-        "norm_divisor"  : _NORM_DIVISOR,
-        "mask_divisor"  : _MASK_DIVISOR,
-        "img_size"      : config.IMG_SIZE,
-        "batch_size"    : batch_size,
-        "seed"          : seed,
+        "n_channels": _N_CHANNELS,
+        "norm_divisor": _NORM_DIVISOR,
+        "mask_divisor": _MASK_DIVISOR,
+        "img_size": config.IMG_SIZE,
+        "batch_size": batch_size,
+        "seed": seed,
+        "dataset_root": str(DATASET_ROOT),
     }
 
     return train_ds, val_ds, test_ds, meta
+

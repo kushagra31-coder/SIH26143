@@ -72,10 +72,10 @@ _set_seeds(args.seed)
 import tensorflow as tf
 tf.random.set_seed(args.seed)
 
-from data_pipeline      import build_datasets
-from dataset_inspector  import run_inspection
+from data_pipeline_updated     import build_datasets
+from dataset_inspector_updated  import run_inspection
 from model              import build_unet, model_summary_str
-from losses_metrics     import bce_dice_loss, DiceMetric, IoUMetric
+from losses_metrics     import bce_dice_tversky_loss, DiceMetric, IoUMetric
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Logging
@@ -183,6 +183,19 @@ def main():
         seed=args.seed,
     )
 
+    # The prepared dataset already contains the train/validation split.
+    # Do not split it again here.
+    if meta["n_train"] == 0:
+        raise RuntimeError("Training dataset is empty.")
+    if meta["n_val"] == 0:
+        raise RuntimeError("Validation dataset is empty.")
+
+    logger.info(
+        "Using predefined dataset split: %d train / %d validation",
+        meta["n_train"],
+        meta["n_val"],
+    )
+
     # Save pipeline metadata
     with open(out_dir / "pipeline_meta.json", "w") as f:
         json.dump(meta, f, indent=2, default=str)
@@ -214,7 +227,7 @@ def main():
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)
     model.compile(
         optimizer = optimizer,
-        loss      = bce_dice_loss,
+        loss      = bce_dice_tversky_loss,
         metrics   = [DiceMetric(name="dice"), IoUMetric(name="iou")],
     )
 
@@ -261,6 +274,12 @@ def main():
         "Validation: %d pairs | %d steps/epoch", n_val, steps_val,
     )
 
+    if meta["n_test"] == 0:
+        logger.info(
+            "No test dataset configured for Phase 1; "
+            "final evaluation will be done separately."
+        )
+
     # ── 7. Train ──────────────────────────────────────────────────────────────
     logger.info("Starting training …")
     history = model.fit(
@@ -300,7 +319,7 @@ def main():
     logger.info("Final metrics saved → %s", metrics_path)
 
     # ── 10. Sample predictions ────────────────────────────────────────────────
-    _save_sample_predictions(model, val_ds, out_dir, n_samples=4)
+    _save_sample_predictions(model, val_ds, out_dir, n_samples=min(4,args.batch_size))
 
     # ── 11. Plot training curves ──────────────────────────────────────────────
     try:
