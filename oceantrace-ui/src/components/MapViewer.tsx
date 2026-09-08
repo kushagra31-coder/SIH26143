@@ -264,6 +264,7 @@ export default function MapViewer({ timelineState, layerVisibilityOverride }: { 
           latitude: -20.44,
           zoom: 11.2
         }}
+        style={{ width: '100%', height: '100%' }}
         mapStyle={MAP_STYLE}
         interactive={true}
         onMouseMove={handleMouseMove}
