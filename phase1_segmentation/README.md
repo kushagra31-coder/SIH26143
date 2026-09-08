@@ -278,14 +278,6 @@ Intersection:       ≈11.39 km²
 Union:              ≈27.81 km²
 Predicted/reference ≈1.93×
 ```
-Interpretation
-The model has:
-high recall;
-moderate spatial agreement;
-relatively low precision;
-substantial overprediction;
-persistent coastal/boundary false positives.
-For a Round 1 MVP, these results are sufficient to demonstrate an end-to-end candidate-detection pipeline, but should not be presented as production-grade or field-validated segmentation accuracy.
 ---
 ## Interpretation
 
