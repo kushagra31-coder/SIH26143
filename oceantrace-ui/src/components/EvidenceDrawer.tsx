@@ -33,11 +33,11 @@ export default function EvidenceDrawer({ isOpen, vesselId, onClose }: { isOpen: 
           <div className="p-6 space-y-8">
             
             {/* Warning Banner if Synthetic */}
-            {data.SYNTHETIC_TEST_DATA && (
+            {('SYNTHETIC_TEST_DATA' in data && (data as any).SYNTHETIC_TEST_DATA) && (
               <div className="bg-red-900/20 border border-red-500/50 p-4 rounded flex items-start space-x-3">
                 <ShieldAlert className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
                 <div className="text-xs text-red-200/80 font-mono leading-relaxed">
-                  {data.WARNING}
+                  {('WARNING' in data) ? String((data as any).WARNING) : "SYNTHETIC TEST DATA USED"}
                 </div>
               </div>
             )}

@@ -1,10 +1,10 @@
 {
   "vessel_name": "Wakashio",
   "imo": "9337119",
-  "total_score": 63.38,
+  "total_score": 85.17,
   "spatial_evidence": {
-    "score": 47.88,
-    "distance_to_origin_km": 26.06,
+    "score": 84.2,
+    "distance_to_origin_km": 7.9,
     "note": "Distance from predicted drift origin to actual vessel location."
   },
   "behavior_evidence": {
