@@ -49,7 +49,7 @@ export default function ReportScreen() {
                 </div>
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Uncertainty Radius</div>
-                  <div className="text-accent-amber font-mono text-xl">26.06 km</div>
+                  <div className="text-accent-amber font-mono text-xl">{data.spatial_evidence.distance_to_origin_km.toFixed(2)} km</div>
                 </div>
               </div>
             </section>

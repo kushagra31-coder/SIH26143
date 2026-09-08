@@ -6,6 +6,7 @@ import type { TimelineState } from '../types/investigation';
 
 import predictionsData from '../data/predictions.json';
 import originData from '../data/origin.json';
+import validationData from '../data/validation.json';
 import candidatesData from '../data/candidates.json';
 import { PREGENERATED_PARTICLES, DRIFT_TIMESTEPS, type TimeStep } from '../data/driftSimulation';
 import ForensicExplainer, { type ExplainerEntity } from './ForensicExplainer';
@@ -111,7 +112,7 @@ export default function MapViewer({ timelineState, layerVisibilityOverride }: { 
               [originData.origin_lon, originData.origin_lat] // Predicted Origin
             ]
           },
-          properties: { label: 'Offset: 26.06 km' }
+          properties: { label: `Offset: ${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km` }
         }
       ]
     };
@@ -301,7 +302,7 @@ export default function MapViewer({ timelineState, layerVisibilityOverride }: { 
         )}
 
         {/* ============================================================ */}
-        {/* 2. DISTANCE CONNECTOR (OFFSET: 26.06 km)                     */}
+        {/* 2. DISTANCE CONNECTOR (OFFSET) */}
         {/* ============================================================ */}
         {layerVisibility.offsetVector && (
           <Source id="offset-connector-src" type="geojson" data={offsetConnectorGeoJSON as any}>
@@ -319,7 +320,7 @@ export default function MapViewer({ timelineState, layerVisibilityOverride }: { 
         )}
 
         {/* ============================================================ */}
-        {/* 3. OPENDRIFT UNCERTAINTY REGION (26.06 km RADIUS)           */}
+        {/* 3. OPENDRIFT UNCERTAINTY REGION */}
         {/* ============================================================ */}
         <Source id="origin-region-src" type="geojson" data={originGeoJSON as any}>
           <Layer 
@@ -544,7 +545,7 @@ export default function MapViewer({ timelineState, layerVisibilityOverride }: { 
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">HINDCAST OFFSET:</span>
-              <span className="text-accent-coral font-bold">26.06 km</span>
+              <span className="text-accent-coral font-bold">{validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km</span>
             </div>
           </div>
         </div>

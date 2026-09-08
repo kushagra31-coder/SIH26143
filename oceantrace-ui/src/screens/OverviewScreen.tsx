@@ -76,7 +76,7 @@ export default function OverviewScreen({ onStart }: Props) {
             <motion.div variants={fadeUp} className="grid grid-cols-4 gap-4">
               {[
                 { icon: Satellite, label: 'SAR Detection Area', value: '12.4 km²', sub: 'Copernicus Sentinel-1', accent: 'var(--color-ocean-teal)', id: '01' },
-                { icon: Waves, label: 'Hindcast Offset', value: '26.06 km', sub: '12-Day OpenDrift Backward', accent: 'var(--color-ocean-cyan)', id: '02' },
+                { icon: Waves, label: 'Hindcast Offset', value: `${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km`, sub: '12-Day OpenDrift Backward', accent: 'var(--color-ocean-cyan)', id: '02' },
                 { icon: Navigation, label: 'Route Deviation', value: '43.32 km', sub: 'Course 241° Anomalous Turn', accent: 'var(--color-ocean-amber)', id: '03' },
                 { icon: ShieldAlert, label: 'Spatial Correlation', value: '0.62 km', sub: 'Hindcast to Grounding Anchor', accent: '#f87171', id: '04' },
               ].map((kpi) => {
@@ -139,9 +139,9 @@ export default function OverviewScreen({ onStart }: Props) {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { num: '01', title: 'Satellite Oil Segmentation', tech: 'Deep Residual U-Net', input: 'Sentinel-1 C-SAR (VV/VH dual-pol)', output: '12.4 km² polygon + 87.4% confidence', icon: Satellite, color: 'var(--color-ocean-teal)' },
-                { num: '02', title: 'Backward Drift Hindcast', tech: 'OpenDrift OceanDrift v1.9', input: 'CMEMS Global Reanalysis + GFS Winds', output: '26.06 km uncertainty radius (95% CI)', icon: Waves, color: 'var(--color-ocean-cyan)' },
+                { num: '02', title: 'Backward Drift Hindcast', tech: 'OpenDrift OceanDrift v1.9', input: 'CMEMS Global Reanalysis + GFS Winds', output: `${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km uncertainty radius (95% CI)`, icon: Waves, color: 'var(--color-ocean-cyan)' },
                 { num: '03', title: 'AIS Spatial Correlation', tech: 'Trajectory Matching Algorithm', input: 'Historical AIS Transponder Feed', output: '43.32 km planned corridor violation', icon: Navigation, color: 'var(--color-ocean-amber)' },
-                { num: '04', title: 'Evidence Scoring & Attribution', tech: 'Bayesian Composite Evidence', input: 'Spatial (98.76%) + Behavioral (86.64%)', output: 'MV Wakashio: 93.91% Forensic Match', icon: BarChart2, color: '#f87171' },
+                { num: '04', title: 'Evidence Scoring & Attribution', tech: 'Bayesian Composite Evidence', input: `Spatial (${validationData.spatial_evidence.score.toFixed(2)}%) + Behavioral (${validationData.behavior_evidence.score.toFixed(2)}%)`, output: `MV ${validationData.vessel_name}: ${validationData.total_score}% Forensic Match`, icon: BarChart2, color: '#f87171' },
               ].map(m => {
                 const Icon = m.icon;
                 return (

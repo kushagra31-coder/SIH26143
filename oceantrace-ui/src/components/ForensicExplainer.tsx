@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, Crosshair, Navigation, Compass, Waves, Wind, ShieldCheck, ExternalLink, MapPin } from 'lucide-react';
+import validationData from '../data/validation.json';
 
 export type ExplainerEntity = 'GROUNDING' | 'DEVIATION' | 'PLANNED' | 'HINDCAST' | 'SLICK' | 'WAKASHIO' | null;
 
@@ -94,8 +95,8 @@ const DETAILS: Record<Exclude<ExplainerEntity, null>, EntityDetail> = {
     telemetry: [
       { label: "Hindcast Model", value: "OpenDrift OceanDrift v1.9" },
       { label: "Ocean Forcing", value: "CMEMS Global Reanalysis (0.38 m/s)" },
-      { label: "Windage Factor", value: "3.2% of GFS 10m Wind" },
-      { label: "Uncertainty Radius", value: "26.06 km (95% CI)" }
+      { label: "Hindcast Confidence", value: "95% (Ensemble Mean)" },
+      { label: "Uncertainty Radius", value: `${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km (95% CI)` }
     ],
     physicsExplanation: "Particles are driven backwards by reversing hydrodynamic vectors: x(t - Δt) = x(t) - (u_curr + α u_wind)Δt + η. Turbulent diffusion accounts for bathymetric shear around the coral lagoon.",
     investigationReport: "Spatial match confirmed: The backward trajectory converges directly onto the MV Wakashio grounding anchor within 0.62 km distance.",
@@ -130,14 +131,14 @@ const DETAILS: Record<Exclude<ExplainerEntity, null>, EntityDetail> = {
     coordsDMS: "Panama Flag | Capesize Bulk Carrier (203,130 DWT)",
     summary: "Capesize bulk carrier owned by Okiyo Maritime / Nagashiki Shipping. Chartered by Mitsui O.S.K. Lines (MOL).",
     telemetry: [
-      { label: "Overall Correlation", value: "93.91% Composite Match" },
-      { label: "Spatial Proximity", value: "98.76% (0.62 km to hindcast)" },
-      { label: "Behavioral Score", value: "86.64% (43.32 km deviation)" },
+      { label: "Overall Correlation", value: `${validationData.total_score}% Composite Match` },
+      { label: "Spatial Proximity", value: `${validationData.spatial_evidence.score.toFixed(2)}% (${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km to hindcast)` },
+      { label: "Behavioral Score", value: `${validationData.behavior_evidence.score.toFixed(2)}% (${validationData.behavior_evidence.deviation_from_plan_km.toFixed(2)} km deviation)` },
       { label: "Fuel Oil On Board", value: "3,898 MT VLSFO + 207 MT MGO" }
     ],
     physicsExplanation: "Wakashio is the only vessel exhibiting both temporal co-presence (July 25, 19:25 LT) at the precise hindcast origin and a severe navigational deviation vector leading into the reef.",
     investigationReport: "Captain Sunil Kumar Nandeshwar and Chief Officer Tilakaratna Subodha were arrested and convicted by the Supreme Court of Mauritius.",
-    confidenceScore: "93.91% Forensic Attribution Score",
+    confidenceScore: `${validationData.total_score}% Forensic Attribution Score`,
     actionTarget: 'GROUNDING'
   }
 };

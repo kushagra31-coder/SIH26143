@@ -8,6 +8,7 @@ import {
   AlertTriangle, CheckCircle2, Circle, Database
 } from 'lucide-react';
 import clsx from 'clsx';
+import validationData from '../data/validation.json';
 
 // ─── Layer Definitions ────────────────────────────────────────────────────────
 interface LayerDef {
@@ -29,7 +30,7 @@ const INITIAL_LAYERS: LayerDef[] = [
   { id: 'particles', label: 'Drift Particles (180)', description: 'OpenDrift backward Lagrangian hindcast tracers', variable: 'Particle Density', unit: 'tracers/cell', colorbar: 'current', min: '0', max: '180', active: true, visible: true, color: '#06b6d4' },
   { id: 'actualTrack', label: 'AIS Deviation Track', description: 'MV Wakashio actual vessel trajectory (Course 241°)', variable: 'Vessel Path', unit: '—', colorbar: 'wind', min: 'Deviation', max: 'Grounding', active: true, visible: true, color: '#f87171' },
   { id: 'plannedCorridor', label: 'Planned Safe Corridor', description: 'Authorized pilot-to-pilot passage waypoints 22–23', variable: 'Route Corridor', unit: '—', colorbar: 'wind', min: 'Departure', max: 'Arrival', active: true, visible: true, color: '#94a3b8' },
-  { id: 'offsetVector', label: 'Hindcast Offset Vector', description: 'Distance connector between origin centroid and grounding (26.06 km)', variable: 'Spatial Offset', unit: 'km', colorbar: 'oil', min: '0', max: '26.06', active: true, visible: true, color: '#f59e0b' },
+  { id: 'offsetVector', label: 'Hindcast Offset Vector', description: `Distance connector between origin centroid and grounding (${validationData.spatial_evidence.distance_to_origin_km.toFixed(2)} km)`, variable: 'Spatial Offset', unit: 'km', colorbar: 'oil', min: '0', max: validationData.spatial_evidence.distance_to_origin_km.toFixed(2), active: true, visible: true, color: '#f59e0b' },
 ];
 
 const STAGES: { id: TimelineState; num: string; label: string; description: string; icon: any }[] = [
@@ -187,9 +188,9 @@ export default function InvestigationScreen() {
                     <div className="text-[10px] font-mono font-semibold tracking-widest uppercase mb-2.5" style={{ color: 'var(--color-text-muted)' }}>Case Geometry</div>
                     {[
                       { label: 'Spill Area (SAR)', value: '12.4 km²', color: 'var(--color-ocean-teal)' },
-                      { label: 'Hindcast Offset', value: '26.06 km', color: 'var(--color-ocean-cyan)' },
-                      { label: 'Route Deviation', value: '43.32 km', color: 'var(--color-ocean-amber)' },
-                      { label: 'Attribution Score', value: '93.91%', color: '#f87171' },
+                      { label: 'Hindcast Offset', value: `${validationData.spatial_evidence.distance_to_origin_km} km`, color: 'var(--color-ocean-cyan)' },
+                      { label: 'Route Deviation', value: `${validationData.behavior_evidence.deviation_from_plan_km} km`, color: 'var(--color-ocean-amber)' },
+                      { label: 'Attribution Score', value: `${validationData.total_score}%`, color: '#f87171' },
                     ].map(s => (
                       <div key={s.label} className="flex justify-between items-center py-1.5" style={{ borderBottom: '1px solid rgba(59,130,246,0.06)' }}>
                         <span className="text-[11px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>{s.label}</span>
@@ -372,7 +373,7 @@ export default function InvestigationScreen() {
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.12)'; }}
           >
             <ShieldCheck size={13} />
-            MV WAKASHIO · 93.91% — VIEW DOSSIER
+            MV {validationData.vessel_name.toUpperCase()} · {validationData.total_score}% — VIEW DOSSIER
           </button>
         </div>
       </div>
